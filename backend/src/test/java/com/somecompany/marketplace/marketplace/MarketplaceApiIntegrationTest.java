@@ -240,4 +240,24 @@ class MarketplaceApiIntegrationTest extends IntegrationTestSupport {
                 .andExpect(jsonPath("$.listings[0].sourceId").value("dear"))
                 .andExpect(jsonPath("$.listings[0].ranking.priceScore").value(1.0));
     }
+
+    @Test
+    void tiedScoresAreOrderedByNewerDateThenListingIdThroughTheApi() throws Exception {
+        // Same place (each is the furthest, distance score 1), same price (10) and ages 0 and 3 (freshness 10):
+        // all three score 0.4 * 1 + 0.4 * 10 + 0.2 * 10 = 6.4.
+        upload(List.of(
+                at("c-older", 300000, 38.9, -77.3, "2026-11-22", "active"),
+                at("b-new", 300000, 38.9, -77.3, "2026-11-25", "active"),
+                at("a-new", 300000, 38.9, -77.3, "2026-11-25", "active")));
+
+        search()
+                .andExpect(jsonPath("$.listings[*].sourceId", contains("a-new", "b-new", "c-older")))
+                .andExpect(jsonPath("$.listings[*].ranking.score", contains(6.4, 6.4, 6.4)));
+
+        // The tie order holds across a page boundary.
+        search("page", "0", "size", "2")
+                .andExpect(jsonPath("$.listings[*].sourceId", contains("a-new", "b-new")));
+        search("page", "1", "size", "2")
+                .andExpect(jsonPath("$.listings[*].sourceId", contains("c-older")));
+    }
 }
