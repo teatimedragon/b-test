@@ -23,6 +23,17 @@ export interface Listing {
   listedDate: string;
   status: string;
   description: string;
+  /** Returned by search for validating the ranking; not shown in the UI. */
+  ranking?: Ranking;
+}
+
+export interface Ranking {
+  score: number;
+  distanceScore: number;
+  priceScore: number;
+  freshnessScore: number;
+  distanceMiles: number;
+  ageDays: number;
 }
 
 export interface SearchResponse {

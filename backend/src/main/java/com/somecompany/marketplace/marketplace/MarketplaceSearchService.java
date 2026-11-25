@@ -33,7 +33,7 @@ public class MarketplaceSearchService {
         List<ListingEntity> filtered = filter.filter(candidates, criteria, today);
         List<RankedListing> ranked = ranker.rank(filtered, criteria.location(), today);
         List<MarketplaceListingDto> page = criteria.page().slice(ranked).stream()
-                .map(r -> MarketplaceListingDto.from(r.listing()))
+                .map(MarketplaceListingDto::from)
                 .toList();
         return new MarketplaceSearchResponse(page,
                 PageMeta.of(criteria.page().page(), criteria.page().size(), ranked.size()));

@@ -110,6 +110,21 @@ A JSON array of objects. Values can be JSON strings or numbers. `currencyCode` i
 | `GET /marketplace-admin/logs` | The ListingLog with each entry's errors, most recent first, paginated. |
 | `POST /marketplace-admin/listings` | Upload a JSON array. Returns `200` with a summary even when listings fail validation; `400` if the body is not a JSON array. |
 
+Each search result also has a `ranking` object, so the order can be checked by hand. It is not shown in the UI.
+
+```json
+"ranking": {
+  "score": 2.6,
+  "distanceScore": 1.0,
+  "priceScore": 1.0,
+  "freshnessScore": 9.0,
+  "distanceMiles": 69.0941,
+  "ageDays": 7
+}
+```
+
+`score = 0.4 × distanceScore + 0.4 × priceScore + 0.2 × freshnessScore`. The values are rounded to 4 decimal places for display, and the ordering uses the unrounded values.
+
 Pagination: `page` is 0-based (default 0), `size` is 1 to 100 (default 20), and every list response has `meta: { page, size, totalPages, totalElements }`.
 
 The H2 console is not enabled. To inspect the data, use the two admin `GET` endpoints.

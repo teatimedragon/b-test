@@ -149,6 +149,7 @@ class ListingRankerTest {
             assertThat(b.distanceScore()).isCloseTo(5.5, within(1e-6));
             assertThat(b.priceScore()).isCloseTo(5.5, within(1e-9));
             assertThat(b.freshnessScore()).isEqualTo(9);
+            assertThat(b.ageDays()).isEqualTo(7);
             assertThat(b.score()).isCloseTo(0.4 * 5.5 + 0.4 * 5.5 + 0.2 * 9, within(1e-6));
             assertThat(ids(ranked)).containsExactly("a", "b", "c");
         }

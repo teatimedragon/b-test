@@ -22,13 +22,19 @@ public record MarketplaceListingDto(
         BigDecimal longitude,
         String listedDate,
         String status,
-        String description) {
+        String description,
+        RankingDto ranking) {
 
-    public static MarketplaceListingDto from(ListingEntity l) {
+    /** A ranked listing, with the scores that decided its position. */
+    public static MarketplaceListingDto from(RankedListing ranked) {
+        return from(ranked.listing(), RankingDto.from(ranked));
+    }
+
+    public static MarketplaceListingDto from(ListingEntity l, RankingDto ranking) {
         return new MarketplaceListingDto(l.getListingId(), l.getSourceId(), l.getSourceCode(), l.getAddress(),
                 l.getCity(), l.getState(), l.getZip(), Decimals.price(l.getPrice()), l.getCurrencyCode(),
                 l.getBedrooms() == null ? null : l.getBedrooms().intValue(), Decimals.compact(l.getBathrooms()),
                 l.getSquareFeet(), l.getLatitude(), l.getLongitude(), l.getListedDate(), l.getStatus(),
-                l.getDescription());
+                l.getDescription(), ranking);
     }
 }

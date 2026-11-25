@@ -6,6 +6,7 @@ import com.somecompany.marketplace.domain.ListingEntity;
 public record RankedListing(
         ListingEntity listing,
         double distanceMiles,
+        long ageDays,
         double distanceScore,
         double priceScore,
         double freshnessScore,
