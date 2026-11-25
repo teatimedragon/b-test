@@ -109,6 +109,10 @@ freshnessScore = max(1, 10 − floor(ageDays / 5))
 14. **Unknown routes and methods** keep their framework status (404, 405, …) with `{ "error": … }` and no stack trace. Anything else unexpected returns `500 { "error": "Internal server error" }`.
 15. **Docker base images:** `eclipse-temurin:21-jdk` and `eclipse-temurin:21-jre` for the backend, `node:22-alpine` and `nginx:1.27-alpine` for the frontend. nginx also falls back to `index.html` so `/admin` works on reload, and it allows request bodies up to 20 MB.
 
+### Ranking in the response (added after the first release)
+
+Each listing in the `GET /marketplace/listing` response has a `ranking` object with `score`, `distanceScore`, `priceScore`, `freshnessScore`, `distanceMiles` and `ageDays`. This is an addition to the spec's response shape, so the ranking can be checked by hand; the UI ignores it. The values are rounded to 4 decimal places (HALF_UP), while the ordering still uses the unrounded doubles. The scores are always scaled against the whole filtered set, so a listing on page 2 shows the same scores it would on page 1.
+
 ## 5. Tests
 
 `./mvnw test` (JUnit 5, AssertJ, Mockito, Spring Boot Test with MockMvc and H2):
@@ -120,6 +124,7 @@ freshnessScore = max(1, 10 − floor(ageDays / 5))
 - `HaversineTest`: known distances (one degree of latitude, New York to Los Angeles, Washington to Baltimore, London to Paris, antipodes).
 - `SearchParamsValidatorTest`, `ListingSearchFilterTest`, `PageRequestParamsTest`.
 - `ListingUploadServiceTest` (Mockito): log first, one error row per failure, and an unexpected failure in one listing doesn't stop the next.
+- `RankingDtoTest`: the named scores and the rounding.
 - `MarketplaceSearchServiceTest` (Mockito): ranks the whole set and then slices the page.
 - `AdminApiIntegrationTest` and `MarketplaceApiIntegrationTest`: everything listed in spec section 9.2, end to end over HTTP.
 

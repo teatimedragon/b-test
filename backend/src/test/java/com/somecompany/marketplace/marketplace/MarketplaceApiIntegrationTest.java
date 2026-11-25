@@ -205,4 +205,39 @@ class MarketplaceApiIntegrationTest extends IntegrationTestSupport {
         search("size", "101").andExpect(status().isUnprocessableEntity());
         search("min_price", "1.5").andExpect(status().isUnprocessableEntity());
     }
+
+    @Test
+    void eachListingCarriesItsRankingScores() throws Exception {
+        upload(List.of(
+                at("here", 100000, 38.7893, -77.1873, "2026-11-25", "active"),
+                at("north", 300000, 39.7893, -77.1873, "2026-11-18", "active")));
+
+        search()
+                .andExpect(jsonPath("$.listings[*].sourceId", contains("here", "north")))
+                .andExpect(jsonPath("$.listings[0].ranking.score").value(10.0))
+                .andExpect(jsonPath("$.listings[0].ranking.distanceScore").value(10.0))
+                .andExpect(jsonPath("$.listings[0].ranking.priceScore").value(10.0))
+                .andExpect(jsonPath("$.listings[0].ranking.freshnessScore").value(10.0))
+                .andExpect(jsonPath("$.listings[0].ranking.distanceMiles").value(0.0))
+                .andExpect(jsonPath("$.listings[0].ranking.ageDays").value(0))
+                // 0.4 * 1 + 0.4 * 1 + 0.2 * 9 = 2.6
+                .andExpect(jsonPath("$.listings[1].ranking.score").value(2.6))
+                .andExpect(jsonPath("$.listings[1].ranking.distanceScore").value(1.0))
+                .andExpect(jsonPath("$.listings[1].ranking.priceScore").value(1.0))
+                .andExpect(jsonPath("$.listings[1].ranking.freshnessScore").value(9.0))
+                .andExpect(jsonPath("$.listings[1].ranking.distanceMiles").value(69.0941))
+                .andExpect(jsonPath("$.listings[1].ranking.ageDays").value(7));
+    }
+
+    @Test
+    void rankingScoresUseTheWholeFilteredSetEvenOnLaterPages() throws Exception {
+        upload(List.of(
+                at("cheap", 100000, 38.7893, -77.1873, "2026-11-25", "active"),
+                at("dear", 500000, 38.7893, -77.1873, "2026-11-25", "active")));
+
+        // Page 1 holds only "dear", but its price score is still scaled against "cheap" (1, not 10).
+        search("page", "1", "size", "1")
+                .andExpect(jsonPath("$.listings[0].sourceId").value("dear"))
+                .andExpect(jsonPath("$.listings[0].ranking.priceScore").value(1.0));
+    }
 }

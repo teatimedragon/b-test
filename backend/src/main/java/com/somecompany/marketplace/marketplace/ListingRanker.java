@@ -47,8 +47,9 @@ public class ListingRanker {
             ListingEntity l = listings.get(i);
             double ds = distanceScore(distances[i], dMax);
             double ps = priceScore(l.getPrice().doubleValue(), pMin, pMax);
-            double fs = freshnessScore(ageDays(l, today));
-            ranked.add(new RankedListing(l, distances[i], ds, ps, fs, weightedScore(ds, ps, fs)));
+            long age = ageDays(l, today);
+            double fs = freshnessScore(age);
+            ranked.add(new RankedListing(l, distances[i], age, ds, ps, fs, weightedScore(ds, ps, fs)));
         }
         ranked.sort(ORDER);
         return List.copyOf(ranked);
